@@ -1,0 +1,32 @@
+-- ============================================================================
+-- seed.sql
+-- ============================================================================
+-- This file contains all DML (Data Manipulation Language) statements for
+-- populating the database with test/demo data.
+--
+-- What to include here:
+--   1. INSERT statements to add sample records to your tables
+--   2. Test data that demonstrates all features of your application
+--   3. Data that covers edge cases (e.g., NULL values where allowed)
+--   4. Enough records to test queries meaningfully (typically 5-20 per table)
+--   5. Data that respects foreign key relationships (insert parents before children)
+--
+-- Example structure:
+--   INSERT INTO users (username, email) VALUES
+--       ('john_doe', 'john@example.com'),
+--       ('jane_smith', 'jane@example.com'),
+--       ('bob_wilson', 'bob@example.com');
+--
+--   INSERT INTO orders (user_id, total) VALUES
+--       (1, 99.99),
+--       (1, 149.50),
+--       (2, 75.00);
+--
+-- Tips:
+--   - Use multi-row INSERT statements for efficiency
+--   - Order matters: insert into parent tables before child tables
+--   - Include a variety of data to test different scenarios
+--   - Consider adding comments explaining what each group of inserts represents
+--
+-- Note: Run this file AFTER schema.sql to populate the database with data.
+-- ============================================================================

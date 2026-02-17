@@ -1,0 +1,43 @@
+-- ============================================================================
+-- schema.sql
+-- ============================================================================
+-- This file contains all DDL (Data Definition Language) statements for creating
+-- the database structure.
+--
+-- What to include here:
+--   1. CREATE DATABASE statement (optional, if not created separately)
+--   2. USE database_name; statement
+--   3. CREATE TABLE statements for all your tables
+--   4. PRIMARY KEY constraints (can be inline or separate)
+--   5. FOREIGN KEY constraints (define relationships between tables)
+--   6. UNIQUE constraints (for columns that must have unique values)
+--   7. CHECK constraints (for data validation rules)
+--   8. DEFAULT values for columns
+--   9. INDEX creation (for frequently queried columns)
+--   10. TRIGGERS (automated actions before/after INSERT/UPDATE/DELETE)
+--   11. STORED PROCEDURES (reusable database operations)
+--   12. FUNCTIONS (custom database functions that return values)
+--   13. VIEWS (virtual tables based on SELECT queries)
+--
+-- Example structure:
+--   CREATE TABLE users (
+--       id INT AUTO_INCREMENT PRIMARY KEY,
+--       username VARCHAR(50) NOT NULL UNIQUE,
+--       email VARCHAR(100) NOT NULL,
+--       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--   );
+--
+--   CREATE TABLE orders (
+--       id INT AUTO_INCREMENT PRIMARY KEY,
+--       user_id INT NOT NULL,
+--       total DECIMAL(10,2),
+--       FOREIGN KEY (user_id) REFERENCES users(id)
+--   );
+--
+--   DELIMITER //
+--   CREATE TRIGGER before_user_insert ...
+--   //
+--   DELIMITER ;
+--
+-- Note: Run this file BEFORE seed.sql to set up the database structure.
+-- ============================================================================

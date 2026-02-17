@@ -76,8 +76,3 @@ Thumbs.db
 
 # Log files
 *.log
-
-# Database files (if using local SQLite for testing)
-*.db
-*.sqlite
-*.sqlite3

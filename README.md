@@ -75,25 +75,6 @@ Run the database setup script to automatically create the schema and seed data:
 python src/setup_db.py
 ```
 
-### Option 2: Manual Setup
-
-If you prefer to set up the database manually:
-
-1. **Create the database:**
-   ```sql
-   CREATE DATABASE your_database_name;
-   ```
-
-2. **Run the schema script:**
-   ```bash
-   mysql -u your_username -p your_database_name < sql/schema.sql
-   ```
-
-3. **Run the seed script:**
-   ```bash
-   mysql -u your_username -p your_database_name < sql/seed.sql
-   ```
-
 ## Running the Application
 
 Start the console application:

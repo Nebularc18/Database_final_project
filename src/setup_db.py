@@ -1,51 +1,112 @@
-# ============================================================================
-# setup_db.py
-# ============================================================================
-"""
-This script initializes the database by running schema.sql and seed.sql.
-Use this to set up a fresh database for testing or development.
+import os
+import re
+import sys
 
-What to include here:
-    1. Read and execute schema.sql (creates tables, constraints, triggers, etc.)
-    2. Read and execute seed.sql (inserts test/demo data)
-    3. Error handling for SQL execution failures
-    4. Success/error messages to inform the user
-    5. Option to run only schema or only seed (optional)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from db import get_connection_no_db, DB_NAME
 
-Example structure:
-    import os
-    from db import get_connection
-
-    def run_sql_file(filepath):
-        connection = get_connection()
-        cursor = connection.cursor()
+def split_sql_statements(sql_content: str) -> list:
+    statements = []
+    current_statement = []
+    in_delimiter_block = False
+    custom_delimiter = ';'
+    
+    lines = sql_content.split('\n')
+    
+    for line in lines:
+        stripped = line.strip()
         
-        with open(filepath, 'r') as f:
-            sql_script = f.read()
+        delimiter_match = re.match(r'DELIMITER\s+(\S+)', stripped, re.IGNORECASE)
+        if delimiter_match:
+            if current_statement and ''.join(current_statement).strip():
+                statements.append(''.join(current_statement).strip())
+                current_statement = []
+            custom_delimiter = delimiter_match.group(1)
+            in_delimiter_block = (custom_delimiter != ';')
+            continue
         
-        # Split and execute statements
-        for statement in sql_script.split(';'):
-            if statement.strip():
+        if in_delimiter_block:
+            if custom_delimiter in stripped:
+                parts = line.split(custom_delimiter)
+                current_statement.append(parts[0])
+                if ''.join(current_statement).strip():
+                    statements.append(''.join(current_statement).strip())
+                current_statement = []
+                if len(parts) > 1 and parts[1].strip():
+                    current_statement.append(parts[1])
+            else:
+                current_statement.append(line + '\n')
+        else:
+            if ';' in stripped:
+                semi_idx = line.find(';')
+                current_statement.append(line[:semi_idx + 1])
+                if ''.join(current_statement).strip():
+                    statements.append(''.join(current_statement).strip())
+                current_statement = []
+                if semi_idx + 1 < len(line) and line[semi_idx + 1:].strip():
+                    current_statement.append(line[semi_idx + 1:])
+            else:
+                current_statement.append(line + '\n')
+    
+    if current_statement:
+        stmt = ''.join(current_statement).strip()
+        if stmt:
+            statements.append(stmt)
+    
+    return statements
+
+def run_sql_file(filepath: str, connection):
+    cursor = connection.cursor()
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        sql_script = f.read()
+    
+    statements = split_sql_statements(sql_script)
+    
+    for statement in statements:
+        if statement.strip():
+            try:
                 cursor.execute(statement)
+                while cursor.nextset():
+                    pass
+            except Exception as e:
+                print(f"Error executing statement: {e}")
+                print(f"Statement: {statement[:100]}...")
+                raise
+    
+    connection.commit()
+    cursor.close()
+
+def setup_database():
+    print("Setting up database...")
+    
+    connection = get_connection_no_db()
+    if not connection:
+        print("Failed to connect to MySQL server")
+        return False
+    
+    try:
+        schema_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sql', 'schema.sql')
+        seed_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sql', 'seed.sql')
         
-        connection.commit()
-        cursor.close()
-        connection.close()
-
-    def setup_database():
         print("Running schema.sql...")
-        run_sql_file('sql/schema.sql')
+        run_sql_file(schema_path, connection)
+        print("Schema created successfully!")
+        
         print("Running seed.sql...")
-        run_sql_file('sql/seed.sql')
-        print("Database setup complete!")
+        run_sql_file(seed_path, connection)
+        print("Seed data inserted successfully!")
+        
+        print(f"\nDatabase '{DB_NAME}' setup complete!")
+        return True
+        
+    except Exception as e:
+        print(f"Error setting up database: {e}")
+        connection.rollback()
+        return False
+    finally:
+        if connection and connection.is_connected():
+            connection.close()
 
-    if __name__ == "__main__":
-        setup_database()
-
-Tips:
-    - Handle multi-statement SQL files properly
-    - Use transactions for atomic operations
-    - Provide clear output about what's being executed
-    - Consider adding a --reset flag to drop existing tables first
-    - Handle DELIMITER changes in stored procedures/triggers
-"""
+if __name__ == "__main__":
+    setup_database()
